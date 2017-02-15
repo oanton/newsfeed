@@ -11,6 +11,7 @@ import PerfectHTTP
 import PerfectHTTPServer
 
 import PerfectRequestLogger
+import SQLiteStORM
 
 struct Filter404: HTTPResponseFilter {
     func filterBody(response: HTTPResponse, callback: (HTTPResponseFilterResult) -> ()) {
@@ -27,6 +28,10 @@ struct Filter404: HTTPResponseFilter {
         }
     }
 }
+
+
+let connect = SQLiteConnect("./newsfeeddb")
+
 
 let server = HTTPServer()
 

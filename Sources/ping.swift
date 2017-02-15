@@ -10,7 +10,14 @@ import PerfectHTTP
 import SwiftyJSON
 
 func pingHandler(request: HTTPRequest, _ response: HTTPResponse) {
+    
+    var resp = [String: String]()
+    resp["path"] = "\(request.path)"
+    do {
+        try response.setBody(json: resp)
+    } catch {
+        print(error)
+    }
     response.setHeader(.contentType, value: "application/json")
-    try! response.setBody(json: ["path": "\(request.path)"])
     response.completed()
 }
