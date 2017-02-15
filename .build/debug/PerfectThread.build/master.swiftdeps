@@ -1,0 +1,6 @@
+version: "Apple Swift version 3.0.2 (swiftlang-800.0.63 clang-800.0.42.1)"
+options: "30e832dd007d3c854e56b83fa448264f"
+build_time: [540434143, 710698000]
+inputs:
+  "/Volumes/macD/Web/Newsfeed/Packages/PerfectThread-2.0.5/Sources/Threading.swift": [540433807, 0]
+  "/Volumes/macD/Web/Newsfeed/Packages/PerfectThread-2.0.5/Sources/ThreadQueue.swift": [540433807, 0]
