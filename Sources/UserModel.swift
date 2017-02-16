@@ -12,6 +12,9 @@ import PerfectLib
 import PerfectHTTP
 import SwiftyJSON
 
+import PerfectSession
+import TurnstileCrypto
+
 class UserModel: SQLiteStORM {
     var id = 0
     var hash = ""
@@ -48,7 +51,7 @@ class UserModel: SQLiteStORM {
     }
     
     // MARK: API
-    static func registrationHandler(request: HTTPRequest, _ response: HTTPResponse) {
+    static func logoutHandler(request: HTTPRequest, _ response: HTTPResponse) {
         var data = [String: String]()
         data["path"] = "\(request.path)"
         do {
@@ -56,7 +59,29 @@ class UserModel: SQLiteStORM {
         } catch {
             print(error)
         }
-        response.setHeader(.contentType, value: "application/json")
+        jsonResponse(response)
+        response.completed()
+    }
+    
+    static func registrationHandler(request: HTTPRequest, _ response: HTTPResponse) {
+        
+        jsonResponse(response)
+        var session = request.session
+        if session == nil {
+            session = PerfectSession()
+            let rand = URandom()
+            session?.token = rand.secureToken
+        }
+        
+        request.session = session
+        var data = [String: String]()
+        data["token"] = session?.token ?? ""
+        do {
+            try response.setBody(json: successResponse(data: data))
+        } catch {
+            print(error)
+        }
+        
         response.completed()
     }
     
@@ -68,7 +93,7 @@ class UserModel: SQLiteStORM {
         } catch {
             print(error)
         }
-        response.setHeader(.contentType, value: "application/json")
+        jsonResponse(response)
         response.completed()
     }
     
@@ -80,7 +105,7 @@ class UserModel: SQLiteStORM {
         } catch {
             print(error)
         }
-        response.setHeader(.contentType, value: "application/json")
+        jsonResponse(response)
         response.completed()
     }
     
@@ -92,7 +117,7 @@ class UserModel: SQLiteStORM {
         } catch {
             print(error)
         }
-        response.setHeader(.contentType, value: "application/json")
+        jsonResponse(response)
         response.completed()
     }    
 }

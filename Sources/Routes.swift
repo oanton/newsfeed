@@ -16,7 +16,8 @@ public func makeJSONRoutes(_ root: String = "/api/v1") -> Routes {
     
     routes.add(method: .get, uri: "\(root)/services", handler: ServiceModel.servicesHandler)
     
-    routes.add(method: .get, uri: "\(root)/user/registration", handler: UserModel.registrationHandler)
+    routes.add(method: .get, uri: "\(root)/registration", handler: UserModel.registrationHandler)
+    routes.add(method: .get, uri: "\(root)/logout", handler: UserModel.logoutHandler)
     routes.add(method: .get, uri: "\(root)/user/tags", handler: UserModel.tagsHandler)
     routes.add(method: .post, uri: "\(root)/user/tags", handler: UserModel.addTagHandler)
     routes.add(method: .delete, uri: "\(root)/user/tags", handler: UserModel.deleteTagHandler)

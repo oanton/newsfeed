@@ -11,8 +11,39 @@ import PerfectHTTP
 import PerfectHTTPServer
 import PerfectRequestLogger
 import SQLiteStORM
+import PerfectSession
 
-import TurnstileCrypto
+// Enabled, true or false.
+// Default is false.
+SessionConfig.CORS.enabled = true
+
+// Array of acceptable hostnames for incoming requets
+// To enable CORS on all, have a single entry, *
+SessionConfig.CORS.acceptableHostnames = ["*"]
+
+// However if you wish to enable specific domains:
+//SessionConfig.CORS.acceptableHostnames.append("0.0.0.0")
+
+// Wildcards can also be used at the start or end of hosts
+//SessionConfig.CORS.acceptableHostnames.append("*.example.com")
+//SessionConfig.CORS.acceptableHostnames.append("http://www.domain.*")
+
+// Array of acceptable methods
+public var methods: [HTTPMethod] = [.get, .post, .put]
+
+// An array of custom headers allowed
+public var customHeaders = [String]()
+
+// Access-Control-Allow-Credentials true/false.
+// Standard CORS requests do not send or set any cookies by default.
+// In order to include cookies as part of the request enable the client to do so by setting to true
+public var withCredentials = false
+
+// Max Age (seconds) of request / OPTION caching.
+// Set to 0 for no caching (default)
+public var maxAge = 3600
+
+
 
 let connect = SQLiteConnect("./newsfeeddb")
 createTablesIfNeed(connect: connect)

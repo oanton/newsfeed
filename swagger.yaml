@@ -30,7 +30,7 @@ paths:
             items:
               $ref: '#/definitions/Service'
 
-  /user/registration:
+  /registration:
     get:
       parameters:
         - name: session
@@ -40,7 +40,18 @@ paths:
       responses:
         200:
           description: OK
-  
+
+  /logout:
+    get:
+      parameters:
+        - name: session
+          in: header
+          required: false
+          type: string
+      responses:
+        200:
+          description: OK
+
   /user/tags:
     get:
       parameters:

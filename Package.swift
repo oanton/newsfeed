@@ -16,7 +16,7 @@ let package = Package(
         .Package(url: "https://github.com/dabfleming/Perfect-RequestLogger.git", majorVersion: 0, minor: 2),
         .Package(url: "https://github.com/SwiftyJSON/SwiftyJSON.git", versions: Version(1,0,0)..<Version(3, .max, .max)),
         .Package(url: "https://github.com/SwiftORM/SQLite-StORM.git", majorVersion: 0, minor: 0),
-        .Package(url: "https://github.com/stormpath/Turnstile-Perfect.git", majorVersion:1),
-        .Package(url: "https://github.com/walkline/RSSProvider.git", majorVersion: 1)
+        .Package(url: "https://github.com/walkline/RSSProvider.git", majorVersion: 1),
+        .Package(url: "https://github.com/PerfectlySoft/Perfect-Session.git", majorVersion: 1, minor: 1),
     ]
 )
