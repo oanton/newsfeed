@@ -1,5 +1,5 @@
 //
-//  Database.swift
+//  SQLite+Helper.swift
 //  Newsfeed
 //
 //  Created by Anton Nebylytsia on 2/15/17.
@@ -7,10 +7,16 @@
 //
 
 import PerfectLib
-import SQLite
+import StORM
+import SQLiteStORM
 
-extension SQLite {
-    static func createTablesIfNeed() {
-        
-    }
+func createTablesIfNeed(connect: SQLiteConnect) {
+    UserModel(connect).setup()
+    ServiceModel(connect).setup()
+    ArticleModel(connect).setup()
+    TagModel(connect).setup()
+    
+    UserTagRelation(connect).setup()
+    ArticleTagRelation(connect).setup()
 }
+

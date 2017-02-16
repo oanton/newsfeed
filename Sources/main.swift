@@ -9,53 +9,26 @@
 import PerfectLib
 import PerfectHTTP
 import PerfectHTTPServer
-
 import PerfectRequestLogger
 import SQLiteStORM
 
-struct Filter404: HTTPResponseFilter {
-    func filterBody(response: HTTPResponse, callback: (HTTPResponseFilterResult) -> ()) {
-        callback(.continue)
-    }
-    
-    func filterHeaders(response: HTTPResponse, callback: (HTTPResponseFilterResult) -> ()) {
-        if case .notFound = response.status {
-            
-            do {
-                try response.setBody(json: failResponse(messages: ["The file \(response.request.path) was not found."], code: 404))
-            } catch {
-                print(error)
-            }
-            
-            response.setHeader(.accessControlAllowOrigin, value: "*")
-            response.setHeader(.contentType, value: "application/json")
-            response.setHeader(.contentLength, value: "\(response.bodyBytes.count)")
-            callback(.done)
-        } else {
-            callback(.continue)
-        }
-    }
-}
-
-func successResponse(data:Any, code:Int) -> [String: Any] {
-    var response = [String: Any]()
-    response["status"] = "success"
-    response["data"] = data
-    return response
-}
-
-func failResponse(messages:[String], code:Int) -> [String: Any] {
-    var response = [String: Any]()
-    response["status"] = "error"
-    response["code"] = "\(code)"
-    response["messages"] = messages
-    return response
-}
-
+import TurnstileCrypto
 
 let connect = SQLiteConnect("./newsfeeddb")
-//let user = User(connect)
-//try user.setupTable()
+createTablesIfNeed(connect: connect)
+
+/* 
+ // Test code for create and fetch data via StORM
+let user = UserModel(connect)
+user.hash = URandom().secureToken
+try user.save()
+
+try user.findAll()
+for obj in user.rows() {
+    print("\(obj.id) - \(obj.hash)")
+}
+*/
+
 
 let server = HTTPServer()
 
@@ -63,8 +36,8 @@ let logger = RequestLogger()
 server.setRequestFilters([(logger, .high)])
 server.setResponseFilters([(logger, .low)])
 
-let JSONRoutes = makeJSONRoutes("/api/v1")
-server.addRoutes(JSONRoutes)
+let jsonRoutes = makeJSONRoutes("/api/v1")
+server.addRoutes(jsonRoutes)
 
 server.serverPort = 8079
 server.setResponseFilters([(Filter404(), .high)])

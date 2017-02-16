@@ -1,8 +1,8 @@
 //
-//  User.swift
+//  ServiceModel.swift
 //  Newsfeed
 //
-//  Created by Anton Nebylytsia on 2/15/17.
+//  Created by Anton Nebylytsia on 2/16/17.
 //
 //
 
@@ -12,26 +12,28 @@ import PerfectLib
 import PerfectHTTP
 import SwiftyJSON
 
-class User: SQLiteStORM {
+class ServiceModel: SQLiteStORM {
     var id = 0
-    var hash = ""
+    var name = ""
+    var host = ""
     
-// MARK: DataBase
+    // MARK: DataBase
     // Set the table name
     override open func table() -> String {
-        return "user"
+        return "service"
     }
     
     // Need to do this because of the nature of Swift's introspection
     override func to(_ this: StORMRow) {
         id = this.data["id"] as? Int ?? 0
-        hash = this.data["hash"] as! String
+        name = this.data["name"] as! String
+        host = this.data["host"] as! String
     }
     
-    func rows() -> [User] {
-        var rows = [User]()
+    func rows() -> [ServiceModel] {
+        var rows = [ServiceModel]()
         for i in 0..<self.results.rows.count {
-            let row = User()
+            let row = ServiceModel()
             row.to(self.results.rows[i])
             rows.append(row)
         }
@@ -41,23 +43,18 @@ class User: SQLiteStORM {
     // Create the table if needed
     public func setup() {
         do {
-            // INSERT INTO user (hash) VALUES ('');
-            // CREATE TABLE IF NOT EXISTS user(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, hash TEXT);
-            try sqlExec("CREATE TABLE IF NOT EXISTS \(table()) (" +
-                "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
-                "hash TEXT " +
-                ")")
+            try self.setupTable()
         } catch {
             print(error)
         }
     }
     
-// MARK: API
-    static func registrationHandler(request: HTTPRequest, _ response: HTTPResponse) {
-        var resp = [String: String]()
-        resp["path"] = "\(request.path)"
+    // MARK: API
+    static func servicesHandler(request: HTTPRequest, _ response: HTTPResponse) {
+        var data = [String: String]()
+        data["path"] = "\(request.path)"        
         do {
-            try response.setBody(json: resp)
+            try response.setBody(json: successResponse(data: data))
         } catch {
             print(error)
         }
@@ -65,4 +62,3 @@ class User: SQLiteStORM {
         response.completed()
     }
 }
-

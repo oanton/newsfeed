@@ -151,7 +151,10 @@ definitions:
         type: integer
       isRead:
         type: boolean
-        
+      url:
+        type: string
+
+
   Service:
     type: object
     properties:
