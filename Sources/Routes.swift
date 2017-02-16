@@ -15,6 +15,6 @@ public func makeJSONRoutes(_ root: String = "/api/v1") -> Routes {
     var routes = Routes()
     
     routes.add(method: .get, uri: "\(root)/ping", handler: pingHandler)
-    
+    routes.add(method: .get, uri: "\(root)/services", handler: User.registrationHandler)
     return routes
 }

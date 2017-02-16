@@ -20,7 +20,15 @@ struct Filter404: HTTPResponseFilter {
     
     func filterHeaders(response: HTTPResponse, callback: (HTTPResponseFilterResult) -> ()) {
         if case .notFound = response.status {
-            response.setBody(string: "The file \(response.request.path) was not found.")
+            
+            do {
+                try response.setBody(json: failResponse(messages: ["The file \(response.request.path) was not found."], code: 404))
+            } catch {
+                print(error)
+            }
+            
+            response.setHeader(.accessControlAllowOrigin, value: "*")
+            response.setHeader(.contentType, value: "application/json")
             response.setHeader(.contentLength, value: "\(response.bodyBytes.count)")
             callback(.done)
         } else {
@@ -29,9 +37,25 @@ struct Filter404: HTTPResponseFilter {
     }
 }
 
+func successResponse(data:Any, code:Int) -> [String: Any] {
+    var response = [String: Any]()
+    response["status"] = "success"
+    response["data"] = data
+    return response
+}
+
+func failResponse(messages:[String], code:Int) -> [String: Any] {
+    var response = [String: Any]()
+    response["status"] = "error"
+    response["code"] = "\(code)"
+    response["messages"] = messages
+    return response
+}
+
 
 let connect = SQLiteConnect("./newsfeeddb")
-
+//let user = User(connect)
+//try user.setupTable()
 
 let server = HTTPServer()
 

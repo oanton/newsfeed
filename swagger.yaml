@@ -1,0 +1,178 @@
+# this is an example of the Uber API
+
+swagger: '2.0'
+info:
+  title: Newsfeed API
+#  description: Newsfeed
+  version: "0.0.1"
+# the domain of the service
+host: 0.0.0.0:8079
+# array of all schemes that your API supports
+schemes:
+  - http
+# will be prefixed to all paths
+basePath: /api/v1
+produces:
+  - application/json
+paths:
+  /services:
+    get:
+      parameters:
+        - name: session
+          in: header
+          required: true
+          type: string
+      responses:
+        200:
+          description: An array of services
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Service'
+
+  /user/registration:
+    get:
+      parameters:
+        - name: session
+          in: header
+          required: false
+          type: string
+      responses:
+        200:
+          description: OK
+  
+  /user/tags:
+    get:
+      parameters:
+        - name: session
+          in: header
+          required: true
+          type: string
+      responses:
+        200:
+          description: An array of tags
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Tag'
+    post:
+      parameters:
+        - name: session
+          in: header
+          required: true
+          type: string
+        - name: tag
+          in: formData
+          required: true
+          type: string
+          format: JSON
+      responses:
+        200:
+          description: OK
+    delete:
+      parameters:
+        - name: session
+          in: header
+          required: true
+          type: string
+        - name: tag
+          in: query
+          required: true
+          type: string
+      responses:
+        200:
+          description: OK
+    
+
+  /articles:
+    get:
+      parameters:
+        - name: session
+          in: header
+          required: false
+          type: string
+      responses:
+        200:
+          description: An array of articles
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Article'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  
+  '/articles/{article_id}/read':
+    get:
+      parameters:
+        - name: session
+          in: header
+          required: true
+          type: string
+        - name: article_id
+          in: path
+          required: true
+          type: integer
+      responses:
+        200:
+          description: OK
+          
+  '/articles/{article_id}/unread':
+    get:
+      parameters:
+        - name: session
+          in: header
+          required: true
+          type: string
+        - name: article_id
+          in: path
+          required: true
+          type: integer
+      responses:
+        200:
+          description: OK          
+          
+definitions:
+  Article:
+    type: object
+    properties:
+      article_id:
+        type: integer
+      title:
+        type: string
+      description:
+        type: string
+      dateCreated:
+        type: integer
+      dateIndexed:
+        type: integer
+      service_id:
+        type: integer
+      isRead:
+        type: boolean
+        
+  Service:
+    type: object
+    properties:
+      service_id:
+        type: integer
+      name:
+        type: string
+      host:
+        type: string
+  
+  Tag:
+    type: object
+    properties:
+      name: 
+        type: string
+  
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string

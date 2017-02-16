@@ -44,12 +44,14 @@ class Article: SQLiteStORM {
     // Create the table if needed
     public func setup() {
         do {
+            // INSERT INTO article (title,body,dateCreated,dateIndexed) VALUES ('','','','');
+            // CREATE TABLE article(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, title TEXT, body TEXT, dateCreated DATETIME, dateIndexed DATETIME);
             try sqlExec("CREATE TABLE IF NOT EXISTS \(table()) ( " +
                 "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
                 "title TEXT, " +
                 "body TEXT, " +
-                "dateCreated REAL, " +
-                "dateIndexed REAL " +
+                "dateCreated DATETIME, " +
+                "dateIndexed DATETIME " +
                 ")")
         } catch {
             print(error)
