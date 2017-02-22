@@ -1,5 +1,5 @@
 //
-//  ServiceModel.swift
+//  TagModel.swift
 //  Newsfeed
 //
 //  Created by Anton Nebylytsia on 2/16/17.
@@ -12,28 +12,26 @@ import PerfectLib
 import PerfectHTTP
 import SwiftyJSON
 
-class ServiceModel: SQLiteStORM {
+class TagModel: SQLiteStORM {
     var id = 0
     var name = ""
-    var host = ""
     
     // MARK: DataBase
     // Set the table name
     override open func table() -> String {
-        return "service"
+        return "tag"
     }
     
     // Need to do this because of the nature of Swift's introspection
     override func to(_ this: StORMRow) {
         id = this.data["id"] as? Int ?? 0
         name = this.data["name"] as! String
-        host = this.data["host"] as! String
     }
     
-    func rows() -> [ServiceModel] {
-        var rows = [ServiceModel]()
+    func rows() -> [TagModel] {
+        var rows = [TagModel]()
         for i in 0..<self.results.rows.count {
-            let row = ServiceModel()
+            let row = TagModel()
             row.to(self.results.rows[i])
             rows.append(row)
         }
@@ -41,24 +39,11 @@ class ServiceModel: SQLiteStORM {
     }
     
     // Create the table if needed
-    public func setup() {
+    public override func setupTable() {
         do {
-            try self.setupTable()
+            try super.setupTable()
         } catch {
             print(error)
         }
-    }
-    
-    // MARK: API
-    static func servicesHandler(request: HTTPRequest, _ response: HTTPResponse) {
-        var data = [String: String]()
-        data["path"] = "\(request.path)"        
-        do {
-            try response.setBody(json: successResponse(data: data))
-        } catch {
-            print(error)
-        }
-        response.setHeader(.contentType, value: "application/json")
-        response.completed()
     }
 }

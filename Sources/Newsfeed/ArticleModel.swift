@@ -51,50 +51,12 @@ class ArticleModel: SQLiteStORM {
     }
     
     // Create the table if needed
-    public func setup() {
+    public override func setupTable() {
         do {
-            try self.setupTable()
+            try super.setupTable()
         } catch {
             print(error)
         }
     }
-    
-    // MARK: API
-    static func articlesHandler(request: HTTPRequest, _ response: HTTPResponse) {
-        var data = [String: String]()
-        data["path"] = "\(request.path)"
-        do {
-            try response.setBody(json: successResponse(data: data))
-        } catch {
-            print(error)
-        }
-        response.setHeader(.contentType, value: "application/json")
-        response.completed()
-    }
-    
-    static func readArticleHandler(request: HTTPRequest, _ response: HTTPResponse) {
-        var data = [String: String]()
-        data["path"] = "\(request.path)"
-        do {
-            try response.setBody(json: successResponse(data: data))
-        } catch {
-            print(error)
-        }
-        response.setHeader(.contentType, value: "application/json")
-        response.completed()
-    }
-    
-    static func unreadArticleHandler(request: HTTPRequest, _ response: HTTPResponse) {
-        var data = [String: String]()
-        data["path"] = "\(request.path)"
-        do {
-            try response.setBody(json: successResponse(data: data))
-        } catch {
-            print(error)
-        }
-        response.setHeader(.contentType, value: "application/json")
-        response.completed()
-    }
-
 }
 

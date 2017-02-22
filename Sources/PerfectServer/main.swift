@@ -12,6 +12,10 @@ import PerfectHTTPServer
 import PerfectRequestLogger
 import SQLiteStORM
 import PerfectSession
+import Newsfeed
+
+SessionConfig.name = "TestingMemoryDrivers"
+SessionConfig.idle = 3600
 
 // Enabled, true or false.
 // Default is false.
@@ -43,10 +47,8 @@ public var withCredentials = false
 // Set to 0 for no caching (default)
 public var maxAge = 3600
 
-
-
 let connect = SQLiteConnect("./newsfeeddb")
-createTablesIfNeed(connect: connect)
+connect.createTablesIfNeeded()
 
 /* 
  // Test code for create and fetch data via StORM
@@ -62,6 +64,12 @@ for obj in user.rows() {
 
 
 let server = HTTPServer()
+
+let sessionDriver = SessionMemoryDriver()
+
+server.setRequestFilters([sessionDriver.requestFilter])
+server.setResponseFilters([sessionDriver.responseFilter])
+
 
 let logger = RequestLogger()
 server.setRequestFilters([(logger, .high)])
