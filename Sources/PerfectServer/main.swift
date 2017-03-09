@@ -50,19 +50,6 @@ public var maxAge = 3600
 let connect = SQLiteConnect("./newsfeeddb")
 connect.createTablesIfNeeded()
 
-/* 
- // Test code for create and fetch data via StORM
-let user = UserModel(connect)
-user.hash = URandom().secureToken
-try user.save()
-
-try user.findAll()
-for obj in user.rows() {
-    print("\(obj.id) - \(obj.hash)")
-}
-*/
-
-
 let server = HTTPServer()
 
 let sessionDriver = SessionMemoryDriver()

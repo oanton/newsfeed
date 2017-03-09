@@ -17,9 +17,13 @@ class UserTagRelation: SQLiteStORM {
     var tagID = 0
     
     // MARK: DataBase
+    static func tableName() -> String {
+        return "user_tag_relation"
+    }
+    
     // Set the table name
     override open func table() -> String {
-        return "user_tag_relation"
+        return UserTagRelation.tableName()
     }
     
     // Need to do this because of the nature of Swift's introspection

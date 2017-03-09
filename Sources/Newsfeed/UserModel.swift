@@ -50,6 +50,19 @@ public class UserModel: SQLiteStORM {
         return self
     }
     
+    func allTags() -> [TagModel] {
+        return TagModel(connection).allTags(user: self)
+    }
+    
+    func addTag(tag:String) {
+        TagModel(connection).addTag(tag, user: self)
+    }
+    
+    func removeTag(tag:TagModel) {
+        TagModel(connection).removeTag(user: self)
+    }
+    
+    
     // MARK: DataBase
     // Set the table name
     override open func table() -> String {
