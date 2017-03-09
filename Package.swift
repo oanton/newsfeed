@@ -22,7 +22,7 @@ let package = Package(
 
         // misc
         .Package(url: "https://github.com/SwiftyJSON/SwiftyJSON.git", versions: Version(1,0,0)..<Version(3, .max, .max)),
-        .Package(url: "https://github.com/SwiftORM/SQLite-StORM.git", majorVersion: 1),
+        .Package(url: "https://github.com/oanton/SQLite-StORM.git", majorVersion: 1),
         .Package(url: "https://github.com/walkline/RSSProvider.git", majorVersion: 1),
     ]
 )
