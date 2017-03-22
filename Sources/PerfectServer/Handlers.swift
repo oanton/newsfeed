@@ -16,7 +16,7 @@ class Handler {
     init() { }
     
     func authWith(request: HTTPRequest, response: HTTPResponse?) -> UserModel? {
-        guard let token = request.header(.authorization) else {
+        guard let token = request.header(.fromStandard(name: "X-WSSE")) else {
             return nil
         }
         

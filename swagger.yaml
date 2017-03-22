@@ -17,11 +17,6 @@ produces:
 paths:
   /services:
     get:
-      parameters:
-        - name: session
-          in: header
-          required: true
-          type: string
       responses:
         200:
           description: An array of services
@@ -29,36 +24,27 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Service'
+      security:
+        - UserSecurity: []
 
   /registration:
     get:
-      parameters:
-        - name: session
-          in: header
-          required: false
-          type: string
       responses:
         200:
           description: OK
+      security:
+        - UserSecurity: []
 
   /logout:
     get:
-      parameters:
-        - name: session
-          in: header
-          required: false
-          type: string
       responses:
         200:
           description: OK
+      security:
+        - UserSecurity: []
 
   /user/tags:
     get:
-      parameters:
-        - name: session
-          in: header
-          required: true
-          type: string
       responses:
         200:
           description: An array of tags
@@ -66,12 +52,11 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Tag'
+      security:
+        - UserSecurity: []
+        
     post:
       parameters:
-        - name: session
-          in: header
-          required: true
-          type: string
         - name: tag
           in: formData
           required: true
@@ -80,12 +65,11 @@ paths:
       responses:
         200:
           description: OK
+      security:
+        - UserSecurity: []
+          
     delete:
       parameters:
-        - name: session
-          in: header
-          required: true
-          type: string
         - name: tag
           in: query
           required: true
@@ -93,15 +77,11 @@ paths:
       responses:
         200:
           description: OK
-    
+      security:
+        - UserSecurity: []
 
   /articles:
     get:
-      parameters:
-        - name: session
-          in: header
-          required: false
-          type: string
       responses:
         200:
           description: An array of articles
@@ -113,14 +93,12 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+      security:
+        - UserSecurity: []
   
   '/articles/{article_id}/read':
     get:
       parameters:
-        - name: session
-          in: header
-          required: true
-          type: string
         - name: article_id
           in: path
           required: true
@@ -128,6 +106,8 @@ paths:
       responses:
         200:
           description: OK
+      security:
+        - UserSecurity: []
           
   '/articles/{article_id}/unread':
     get:
@@ -190,3 +170,9 @@ definitions:
         format: int32
       message:
         type: string
+
+securityDefinitions:
+  UserSecurity:
+    type: apiKey
+    name: X-WSSE
+    in: header
