@@ -4,7 +4,7 @@ swagger: '2.0'
 info:
   title: Newsfeed API
 #  description: Newsfeed
-  version: "0.0.1"
+  version: "0.0.2"
 # the domain of the service
 host: 0.0.0.0:8079
 # array of all schemes that your API supports
@@ -17,6 +17,8 @@ produces:
 paths:
   /services:
     get:
+      parameters:
+        - $ref: '#/parameters/Authorization'
       responses:
         200:
           description: An array of services
@@ -28,15 +30,26 @@ paths:
         - UserSecurity: []
 
   /registration:
-    get:
+    post:
+      parameters:
+        - name: username
+          in: formData
+          required: true
+          type: string
+          format: JSON
+        - name: password
+          in: formData
+          required: true
+          type: string
+          format: JSON
       responses:
         200:
           description: OK
-      security:
-        - UserSecurity: []
 
   /logout:
     get:
+      parameters:
+        - $ref: '#/parameters/Authorization'
       responses:
         200:
           description: OK
@@ -45,6 +58,8 @@ paths:
 
   /user/tags:
     get:
+      parameters:
+        - $ref: '#/parameters/Authorization'
       responses:
         200:
           description: An array of tags
@@ -62,6 +77,7 @@ paths:
           required: true
           type: string
           format: JSON
+        - $ref: '#/parameters/Authorization'
       responses:
         200:
           description: OK
@@ -74,6 +90,7 @@ paths:
           in: query
           required: true
           type: string
+        - $ref: '#/parameters/Authorization'
       responses:
         200:
           description: OK
@@ -82,6 +99,8 @@ paths:
 
   /articles:
     get:
+      parameters:
+        - $ref: '#/parameters/Authorization'
       responses:
         200:
           description: An array of articles
@@ -103,6 +122,7 @@ paths:
           in: path
           required: true
           type: integer
+        - $ref: '#/parameters/Authorization'
       responses:
         200:
           description: OK
@@ -112,14 +132,11 @@ paths:
   '/articles/{article_id}/unread':
     get:
       parameters:
-        - name: session
-          in: header
-          required: true
-          type: string
         - name: article_id
           in: path
           required: true
           type: integer
+        - $ref: '#/parameters/Authorization'
       responses:
         200:
           description: OK          
@@ -145,7 +162,6 @@ definitions:
       url:
         type: string
 
-
   Service:
     type: object
     properties:
@@ -170,6 +186,15 @@ definitions:
         format: int32
       message:
         type: string
+        
+parameters:
+  Authorization:
+    name: Authorization
+    type: string
+    in: header
+    required: false
+    format: string
+    enum: ["WSSE profile=\"UsernameToken\""]
 
 securityDefinitions:
   UserSecurity:

@@ -1,5 +1,11 @@
 # Newsfeed (Perfect Swift 3.0)
 
+### Compatibility with Swift
+The master branch of this project currently compiles with Xcode 8.2 or the Swift 3.0.2 toolchain on Ubuntu.
+Open Terminal and type following command to know which Swift version is installed.
+```
+swift -version
+```
 
 
 ### Building

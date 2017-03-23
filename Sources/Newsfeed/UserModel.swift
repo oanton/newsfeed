@@ -14,30 +14,64 @@ import PerfectHTTP
 import SwiftyJSON
 
 import PerfectSession
-import TurnstileCrypto
+//import TurnstileCrypto
+
+extension String {
+    static func uniqueString() -> String {
+        return Data(UUID().uuidString.utf8).base64EncodedString()
+    }
+}
 
 public class UserModel: SQLiteStORM {
     public var id: Int = 0
     public var token: String = ""
+    public var username: String = ""
+    public var password: String = ""
+    public var salt: String = ""
     
-    public func generateNewUser() -> UserModel? {
-        self.token = Data(UUID().uuidString.utf8).base64EncodedString()
-        
+//    public func generateNewUser() -> UserModel? {
+//        self.token = Data(UUID().uuidString.utf8).base64EncodedString()
+//        
+//        do {
+//            try self.save(set: { [weak self] (id) in
+//                self?.id = id as! Int
+//            })
+//        } catch {
+//            print("Can't create user. Error: \(error)")
+//            return nil
+//        }
+//        
+//        return self
+//    }
+    public func create(username:String, password:String) -> UserModel? {
+        guard let user = self.user(username: username) else {
+            return nil
+        }
+        user.token = String.uniqueString()
+        user.salt = String.uniqueString()
+        user.username = username;
+        user.password = Encryption.sha1("\(password)")
+        return user
+    }
+    
+    public func user(token:String) -> UserModel? {
         do {
-            try self.save(set: { [weak self] (id) in
-                self?.id = id as! Int
-            })
+            try self.find([("token", token)])
         } catch {
-            print("Can't create user. Error: \(error)")
+            print("Error occured during user finding. Error: \(error)")
+            return nil
+        }
+        
+        if self.id == 0 {
             return nil
         }
         
         return self
     }
     
-    public func authWith(token: String) -> UserModel? {
+    public func user(username:String) -> UserModel? {
         do {
-            try self.find([("token", token)])
+            try self.find([("username", username)])
         } catch {
             print("Error occured during user finding. Error: \(error)")
             return nil
@@ -73,6 +107,9 @@ public class UserModel: SQLiteStORM {
     override public func to(_ this: StORMRow) {
         id = this.data["id"] as? Int ?? 0
         token = this.data["token"] as! String
+        username = this.data["username"] as! String
+        password = this.data["password"] as! String
+        salt = this.data["salt"] as! String
     }
     
     public func rows() -> [UserModel] {

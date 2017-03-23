@@ -22,7 +22,7 @@ SessionConfig.idle = 3600
 SessionConfig.CORS.enabled = true
 SessionConfig.CORS.acceptableHostnames = ["*"]
 SessionConfig.CORS.methods = [.get, .post, .put, .options]
-SessionConfig.CORS.customHeaders = ["Authorization", "X-WSSE"]
+SessionConfig.CORS.customHeaders = ["Authorization", "X-WSSE", "content-type", "origin", "accept", "accept-language"]
 SessionConfig.CORS.maxAge = 60
 
 let connect = SQLiteConnect("./newsfeeddb")

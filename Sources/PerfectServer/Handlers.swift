@@ -9,103 +9,36 @@
 import Foundation
 import PerfectHTTP
 import PerfectSession
-import TurnstileCrypto
+//import TurnstileCrypto
 import Newsfeed
 
-import COpenSSL
-
-extension String.UTF8View {
-    var sha1: [UInt8] {
-        let bytes = UnsafeMutablePointer<UInt8>.allocate(capacity:  Int(SHA_DIGEST_LENGTH))
-        defer { bytes.deallocate(capacity: Int(SHA_DIGEST_LENGTH)) }
-        
-        SHA1(Array<UInt8>(self), (self.count), bytes)
-        
-        var r = [UInt8]()
-        for idx in 0..<Int(SHA_DIGEST_LENGTH) {
-            r.append(bytes[idx])
-        }
-        return r
+extension NSError {
+    static func message(_ message:String, domain:String = "API.ErrorDomain", code: Int = 500) -> NSError {
+        return NSError(domain: domain, code: code, userInfo: [NSLocalizedDescriptionKey : NSLocalizedString(message, comment:"")])
     }
-}
-
-extension UInt8 {
-    // same as String(self, radix: 16)
-    // but outputs two characters. i.e. 0 padded
-    var hexString: String {
-        let s = String(self, radix: 16)
-        if s.characters.count == 1 {
-            return "0" + s
-        }
-        return s
-    }
-}
-
-class WSSE {
-    
-    enum HeaderKey : String {
-        case username = "Username"
-        case passwordDigest = "PasswordDigest"
-        case nonce = "Nonce"
-        case created = "Created"
-    }
-    
-    var userName = ""
-    var digestEncoded = ""
-    var nonce = ""
-    var created = ""
-    
-    init(user:String, secret:String) {
-        userName = user
-        nonce = UUID().uuidString
-        created = String(Date().timeIntervalSince1970)
-        let digest = "\(nonce)\(created)\(secret)".utf8.sha1
-        digestEncoded = digest.map { $0.hexString }.joined(separator: "")
-    }
-    
-    init(_ header: String) {
-        var results = [String:String]()
-        let keys = header.components(separatedBy:", ")
-        for pair in keys {
-            let kv = pair.components(separatedBy:"=")
-            if kv.count > 1 {
-                results.updateValue(kv[1], forKey: kv[0])
-            }
-        }
-//        guard let user = results[HeaderKey.username] else {
-//            userName = user ? : ""
-//        }
-//        userName = results[HeaderKey.username] as? String
-//        digestEncoded = results[HeaderKey.passwordDigest] as? String
-//        nonce = results[HeaderKey.nonce] as? String
-//        created = results[HeaderKey.created] as? String
-//
-    }
-    
-    var header : String {
-        return "UsernameToken \(HeaderKey.username)=\"\(userName)\", \(HeaderKey.passwordDigest)=\"\(digestEncoded)\", \(HeaderKey.nonce)=\"\(nonce.toBase64())\", \(HeaderKey.created)=\"\(created)\""
-    }
-    
 }
 
 class Handler {
     init() { }
     
-    func authWith(request: HTTPRequest, response: HTTPResponse?) -> UserModel? {
-        guard let token = request.header(.custom(name: "X-WSSE")) else {
-            return nil
+    func authWith(request: HTTPRequest, response: HTTPResponse?) -> (UserModel?, NSError?) {
+        guard let xWSSE = request.header(.custom(name: "X-WSSE")),
+            let authorization = request.header(.custom(name: "Authorization")) else {
+            return (nil, NSError.message("Missing token"))
+        }
+        let wsse = AuthorizationWSSE(xwsse: xWSSE, authorization: authorization)
+        guard wsse.isValid else {
+            return (nil, NSError.message("Invalid token"))
+        }
+        guard !wsse.isExpired else {
+            return (nil, NSError.message("Expired token"))
         }
         
-        guard let user = UserModel(connect).authWith(token: token) else {
-            if let response = response {
-                response.setHeader(.contentType, value: "application/json")
-                response.status = .unauthorized
-                response.completed()
-            }
-            return nil
+        guard let user = UserModel(connect).user(username: wsse.userName) else {
+            return (nil, NSError.message("Invalid token"))
         }
         
-        return user
+        return (user, nil)
     }
     
 }
@@ -119,11 +52,11 @@ extension Handler {
 
 //MARK: users
 extension Handler {
-    func handleGetRegistration(request: HTTPRequest, _ response: HTTPResponse) {
-        var user = authWith(request: request, response: nil)
-        if user == nil {
-            user = UserModel(connect).generateNewUser()
-        }
+    func handlePostRegistration(request: HTTPRequest, _ response: HTTPResponse) {
+        var (user, error) = authWith(request: request, response: nil)
+//        if user == nil {
+//            user = UserModel(connect).generateNewUser()
+//        }
         
         guard let finalUser = user else {
             response.status = .internalServerError
