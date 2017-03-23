@@ -28,5 +28,7 @@ public func makeJSONRoutes(_ root: String = "/api/v1") -> Routes {
     routes.add(method: .get, uri: "\(root)/articles/{article_id}/read", handler: handler.handleGetArticleMarkAsRead)
     routes.add(method: .get, uri: "\(root)/articles/{article_id}/unread", handler: handler.handleGetArticleMarkAsUnread)
     
+    
+    routes.add(method: .options, uri: "\(root)/*", handler: handler.handleOptions)
     return routes
 }
