@@ -29,29 +29,18 @@ public class UserModel: SQLiteStORM {
     public var password: String = ""
     public var salt: String = ""
     
-//    public func generateNewUser() -> UserModel? {
-//        self.token = Data(UUID().uuidString.utf8).base64EncodedString()
-//        
-//        do {
-//            try self.save(set: { [weak self] (id) in
-//                self?.id = id as! Int
-//            })
-//        } catch {
-//            print("Can't create user. Error: \(error)")
-//            return nil
-//        }
-//        
-//        return self
-//    }
-    public func create(username:String, password:String) -> UserModel? {
-        guard let user = self.user(username: username) else {
-            return nil
-        }
-        user.token = String.uniqueString()
-        user.salt = String.uniqueString()
-        user.email = username;
-        user.password = Encryption.sha1("\(password)")
-        return user
+    public var session: WSSE?
+    
+    public var description : [String:Any] {
+        return ["email":email]
+    }
+    
+    public func create(username:String, password:String) -> UserModel {
+        self.token = String.uniqueString()
+        self.salt = String.uniqueString()
+        self.email = username;
+        self.password = Encryption.sha1("\(password)")
+        return self
     }
     
     public func user(token:String) -> UserModel? {
@@ -71,7 +60,7 @@ public class UserModel: SQLiteStORM {
     
     public func user(username:String) -> UserModel? {
         do {
-            try self.find([("username", username)])
+            try self.find([("email", username)])
         } catch {
             print("Error occured during user finding. Error: \(error)")
             return nil
@@ -84,12 +73,12 @@ public class UserModel: SQLiteStORM {
         return self
     }
     
-    func allTags() -> [TagModel] {
+    public func allTags() -> [TagModel] {
         return TagModel(connection).allTags(user: self)
     }
     
-    func addTag(tag:String) {
-        TagModel(connection).addTag(tag, user: self)
+    public func addTag(tag:String) -> TagModel? {
+        return TagModel(connection).addTag(tag, user: self)
     }
     
     func removeTag(tag:TagModel) {
@@ -131,4 +120,3 @@ public class UserModel: SQLiteStORM {
         }
     }
 }
-

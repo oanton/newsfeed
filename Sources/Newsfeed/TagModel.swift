@@ -12,9 +12,13 @@ import PerfectLib
 import PerfectHTTP
 import SwiftyJSON
 
-class TagModel: SQLiteStORM {
+public class TagModel: SQLiteStORM {
     var id = 0
     var name = ""
+    
+    public var description : [String:Any] {
+        return ["id":id, "name":name]
+    }
     
     public func removeTagIfNoRelation() {
         do {
@@ -97,10 +101,10 @@ class TagModel: SQLiteStORM {
     }
     
     // Add tag by User
-    public func addTag(_ name: String, user: UserModel) {
+    public func addTag(_ name: String, user: UserModel) -> TagModel? {
         let tag = addTag(name)
-        guard tag != nil else {
-            return
+        if tag == nil {
+            return nil
         }
         let relations = UserTagRelation(user.connection)
         do {
@@ -109,12 +113,13 @@ class TagModel: SQLiteStORM {
                 relations.userID = user.id
                 relations.tagID = tag!.id
                 try relations.save()
-                return
+                return tag
             }
         } catch {
             print("There was an error: \(error)")
-            return
+            return nil
         }
+        return tag
     }
 
     // MARK: Tags for Article
@@ -127,7 +132,7 @@ class TagModel: SQLiteStORM {
     }
     
     // Need to do this because of the nature of Swift's introspection
-    override func to(_ this: StORMRow) {
+    override public func to(_ this: StORMRow) {
         id = this.data["id"] as? Int ?? 0
         name = this.data["name"] as! String
     }

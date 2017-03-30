@@ -12,6 +12,8 @@ schemes:
   - http
 # will be prefixed to all paths
 basePath: /api/v1
+consumes:
+  - application/json
 produces:
   - application/json
 paths:
@@ -45,6 +47,11 @@ paths:
       responses:
         200:
           description: OK
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+        
 
   /logout:
     get:
@@ -181,11 +188,14 @@ definitions:
   Error:
     type: object
     properties:
-      code:
-        type: integer
-        format: int32
-      message:
+      status:
         type: string
+      statusCode:
+        type: string
+      messages:
+        type: array
+        items:
+          type: string
         
 parameters:
   Authorization:

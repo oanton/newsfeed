@@ -35,7 +35,7 @@ public class WSSE : Authorization {
         super.init()
         userName = user
         nonce = UUID().uuidString
-        created = String(Date().timeIntervalSince1970)
+        created = dateFormatter.string(from: Date())
         digestEncoded = self.encoded(nonce: nonce, created: created, secret: secret)
     }
     
@@ -89,10 +89,15 @@ public class WSSE : Authorization {
         return digestEncoded == self.encoded(nonce: nonce, created: created, secret: secret)
     }
     
-    public var isExpired : Bool {
+    private var dateFormatter : DateFormatter {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssXXX"
         dateFormatter.timeZone = NSTimeZone(name: "UTC") as TimeZone!
+        return dateFormatter
+    }
+    
+    public var isExpired : Bool {
+        
         guard let createdDate = dateFormatter.date(from: created) else {
             return false
         }
@@ -108,8 +113,11 @@ public class WSSE : Authorization {
         return "WSSE \(HeaderWSSE.Profile)=\"\(profile)\""
     }
     
-    public var wsse : String {
-        return "\(profile) \(HeaderWSSE.Username)=\"\(userName)\", \(HeaderWSSE.Digest)=\"\(digestEncoded.toBase64())\", \(HeaderWSSE.Nonce)=\"\(nonce.toBase64())\", \(HeaderWSSE.Created)=\"\(created)\""
+    public var wsse : String {        
+        return "\(profile) \(HeaderWSSE.Username)=\"\(userName)\", \(HeaderWSSE.Digest)=\"\(digestEncoded.toBase64())\", \(HeaderWSSE.Nonce)=\"\(nonce.toBase64())\", \(HeaderWSSE.Created)=\"\(created))\""
     }
     
+    public var headers : [String:String] {
+        return ["Authorization" : authorization, "X-WSSE" : wsse]
+    }
 }
