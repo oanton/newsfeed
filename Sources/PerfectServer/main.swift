@@ -14,8 +14,8 @@ import SQLiteStORM
 import PerfectSession
 import Newsfeed
 
-SessionConfig.name = "TestingMemoryDrivers"
-SessionConfig.idle = 3600
+//SessionConfig.name = "TestingMemoryDrivers"
+//SessionConfig.idle = 3600
 
 // Enabled, true or false.
 // Default is false.

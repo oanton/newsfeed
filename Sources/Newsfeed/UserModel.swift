@@ -14,7 +14,7 @@ import PerfectHTTP
 import SwiftyJSON
 
 import PerfectSession
-//import TurnstileCrypto
+import Authorization    
 
 extension String {
     static func uniqueString() -> String {
@@ -25,7 +25,7 @@ extension String {
 public class UserModel: SQLiteStORM {
     public var id: Int = 0
     public var token: String = ""
-    public var username: String = ""
+    public var email: String = ""
     public var password: String = ""
     public var salt: String = ""
     
@@ -49,7 +49,7 @@ public class UserModel: SQLiteStORM {
         }
         user.token = String.uniqueString()
         user.salt = String.uniqueString()
-        user.username = username;
+        user.email = username;
         user.password = Encryption.sha1("\(password)")
         return user
     }
@@ -107,7 +107,7 @@ public class UserModel: SQLiteStORM {
     override public func to(_ this: StORMRow) {
         id = this.data["id"] as? Int ?? 0
         token = this.data["token"] as! String
-        username = this.data["username"] as! String
+        email = this.data["email"] as! String
         password = this.data["password"] as! String
         salt = this.data["salt"] as! String
     }

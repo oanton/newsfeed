@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import Newsfeed
+import SwiftString
 
 struct HeaderWSSE {
     static let Username = "Username"
@@ -17,31 +17,30 @@ struct HeaderWSSE {
     static let Profile = "profile"
 }
 
-extension String {
-    func substring(range:NSRange) -> String {
-        let start = String.UTF16Index(range.location)
-        let end = String.UTF16Index(range.location + range.length)
-        return String(self.utf16[start..<end])!
+public class WSSE : Authorization {
+    
+    public private(set) var profile = "UsernameToken"
+    public private(set) var userName = ""
+    public private(set) var digestEncoded = ""
+    public private(set) var nonce = ""
+    public private(set) var created = ""
+    public private(set) var maxAge : Double = 3600
+    
+    @available(*, unavailable, message: "init is unavailable")
+    override init() {
+        fatalError()
     }
-}
-
-class AuthorizationWSSE {
     
-    var profile = "UsernameToken"
-    var userName = ""
-    var digestEncoded = ""
-    var nonce = ""
-    var created = ""
-    var maxAge : Double = 3600
-    
-    init(user:String, secret:String) {
+    public init(user:String, secret:String) {
+        super.init()
         userName = user
         nonce = UUID().uuidString
         created = String(Date().timeIntervalSince1970)
         digestEncoded = self.encoded(nonce: nonce, created: created, secret: secret)
     }
     
-    init(xwsse: String, authorization: String) {
+    public init(xwsse: String, authorization: String) {
+        super.init()
         let pattern = "\\s([a-zA-Z]+)=\"([^\"]+)\""
         let headers = self.parse(body: xwsse, pattern: pattern)
         guard headers.count == 4 else {
@@ -77,18 +76,20 @@ class AuthorizationWSSE {
         var values : [String:String] = [:]
         
         for result in matches {
-            let key = body.substring(range: result.rangeAt(1))
-            let value = body.substring(range: result.rangeAt(2))
+            let keyRange = result.rangeAt(1)
+            let valueRange = result.rangeAt(2)
+            let key = body.substring(keyRange.location, length: keyRange.length)
+            let value = body.substring(valueRange.location, length: valueRange.length)
             values.updateValue(value, forKey: key)
         }
         return values
     }
     
-    func validatePassword(secret:String) -> Bool {
+    public func validatePassword(secret:String) -> Bool {
         return digestEncoded == self.encoded(nonce: nonce, created: created, secret: secret)
     }
     
-    var isExpired : Bool {
+    public var isExpired : Bool {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssXXX"
         dateFormatter.timeZone = NSTimeZone(name: "UTC") as TimeZone!
@@ -99,15 +100,15 @@ class AuthorizationWSSE {
         return !(timeLeft >= 0 && timeLeft <= maxAge)
     }
     
-    var isValid : Bool {
+    public var isValid : Bool {
         return !(profile.isEmpty || userName.isEmpty || digestEncoded.isEmpty || nonce.isEmpty || created.isEmpty)
     }
     
-    var authorization : String {
+    public var authorization : String {
         return "WSSE \(HeaderWSSE.Profile)=\"\(profile)\""
     }
     
-    var wsse : String {
+    public var wsse : String {
         return "\(profile) \(HeaderWSSE.Username)=\"\(userName)\", \(HeaderWSSE.Digest)=\"\(digestEncoded.toBase64())\", \(HeaderWSSE.Nonce)=\"\(nonce.toBase64())\", \(HeaderWSSE.Created)=\"\(created)\""
     }
     

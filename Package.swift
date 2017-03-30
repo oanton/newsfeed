@@ -11,8 +11,9 @@ import PackageDescription
 let package = Package(
     name: "Newsfeed",
     targets: [
-        Target(name: "Newsfeed", dependencies: []),
-        Target(name: "PerfectServer", dependencies: ["Newsfeed"])
+        Target(name: "Authorization", dependencies: []),
+        Target(name: "Newsfeed", dependencies: ["Authorization"]),
+        Target(name: "PerfectServer", dependencies: ["Newsfeed", "Authorization"])
     ],
     dependencies: [
         // Perfect

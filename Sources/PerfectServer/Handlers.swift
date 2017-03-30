@@ -9,8 +9,8 @@
 import Foundation
 import PerfectHTTP
 import PerfectSession
-//import TurnstileCrypto
 import Newsfeed
+import Authorization
 
 extension NSError {
     static func message(_ message:String, domain:String = "API.ErrorDomain", code: Int = 500) -> NSError {
@@ -21,24 +21,47 @@ extension NSError {
 class Handler {
     init() { }
     
-    func authWith(request: HTTPRequest, response: HTTPResponse?) -> (UserModel?, NSError?) {
+    func serverError(_ response: HTTPResponse, error: NSError) {
+        response.status = .badRequest
+        do {
+            try response.setBody(json: failResponse(messages: [error.localizedDescription], code: error.code))
+        } catch {
+            print(error)
+        }
+        response.completed()
+    }
+    
+    func authWith(request: HTTPRequest, response: HTTPResponse) -> UserModel? {
+        let invalidTokenError = NSError.message("Invalid token")
+        
         guard let xWSSE = request.header(.custom(name: "X-WSSE")),
             let authorization = request.header(.custom(name: "Authorization")) else {
-            return (nil, NSError.message("Missing token"))
+                self.serverError(response, error: NSError.message("Missing token"))
+                return nil
         }
-        let wsse = AuthorizationWSSE(xwsse: xWSSE, authorization: authorization)
+        
+        let wsse = WSSE(xwsse: xWSSE, authorization: authorization)
         guard wsse.isValid else {
-            return (nil, NSError.message("Invalid token"))
+            self.serverError(response, error: invalidTokenError)
+            return nil
         }
+        
         guard !wsse.isExpired else {
-            return (nil, NSError.message("Expired token"))
+            self.serverError(response, error: NSError.message("Expired token"))
+            return nil
         }
         
         guard let user = UserModel(connect).user(username: wsse.userName) else {
-            return (nil, NSError.message("Invalid token"))
+            self.serverError(response, error: invalidTokenError)
+            return nil
         }
         
-        return (user, nil)
+        if wsse.validatePassword(secret: user.salt) {
+            return user
+        }
+        
+        self.serverError(response, error: invalidTokenError)
+        return nil
     }
     
 }
@@ -53,32 +76,20 @@ extension Handler {
 //MARK: users
 extension Handler {
     func handlePostRegistration(request: HTTPRequest, _ response: HTTPResponse) {
-        var (user, error) = authWith(request: request, response: nil)
-//        if user == nil {
-//            user = UserModel(connect).generateNewUser()
-//        }
-        
-        guard let finalUser = user else {
-            response.status = .internalServerError
-            response.completed()
-            return
-        }
-        
-        do {
-            try response.setBody(json: successResponse(data: ["token" : finalUser.token]))
-        } catch {
-            print(error)
-        }
-        
-        response.completed()
     }
     
     func handleGetLogout(request: HTTPRequest, _ response: HTTPResponse) {
-        response.sendSuccessReponseWithCurrentPath(request: request)
+        if authWith(request: request, response: response) != nil {
+            response.sendSuccessReponseWithCurrentPath(request: request)
+            response.completed()
+        }
     }
     
     func handleGetUsersTags(request: HTTPRequest, _ response: HTTPResponse) {
-        response.sendSuccessReponseWithCurrentPath(request: request)
+        if let user = authWith(request: request, response: response) {
+            response.sendSuccessReponseWithCurrentPath(request: request)
+            response.completed()
+        }
     }
     
     func handlePostUsersTags(request: HTTPRequest, _ response: HTTPResponse) {
